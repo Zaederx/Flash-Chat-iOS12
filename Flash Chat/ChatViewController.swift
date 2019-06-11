@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import ChameleonFramework
 
 class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource,
 UITextFieldDelegate{
@@ -15,8 +16,8 @@ UITextFieldDelegate{
     
     // Declare instance variables here
 
-    var messageArray = ["First","Second","Third"]
-    var messageArray2:[Message] = [Message]()
+    var dummyArray = ["First","Second","Third"]
+    var messageArray:[Message] = [Message]()
     // We've pre-linked the IBOutlets
     @IBOutlet var heightConstraint: NSLayoutConstraint!
     @IBOutlet var sendButton: UIButton!
@@ -27,15 +28,12 @@ UITextFieldDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         //TODO: Set yourself as the delegate and datasource here:
-        
         messageTableView.delegate = self
         messageTableView.dataSource = self
-        
+    
         //TODO: Set yourself as the delegate of the text field here:
         messageTextfield.delegate = self
-        
         
         //TODO: Set the tapGesture here:
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tableViewTapped))
@@ -46,28 +44,36 @@ UITextFieldDelegate{
         messageTableView.register(messageCell, forCellReuseIdentifier: "customMessageCell")
         configureTableView()
         retrieveMessages()
+        messageTableView.separatorStyle = .none
     }
 
     ///////////////////////////////////////////
     
     //MARK: - TableView DataSource Methods
     
-    
-    
     //TODO: Declare cellForRowAtIndexPath here:
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "customMessageCell", for: indexPath) as! CustomMessageCell
         
-        cell.messageBody.text = messageArray2[indexPath.row].messageBody
-        cell.senderUsername.text = messageArray2[indexPath.row].sender
+        cell.messageBody.text = messageArray[indexPath.row].messageBody
+        cell.senderUsername.text = messageArray[indexPath.row].sender
         cell.avatarImageView.image = UIImage(named:"egg")
+        
+        if cell.senderUsername.text == Auth.auth().currentUser?.email as String? {
+            //extra UIColors are from ChameleonFramework
+            cell.avatarImageView.backgroundColor = UIColor.flatMint()
+            cell.messageBackground.backgroundColor = UIColor.flatSand()
+        } else {
+            cell.avatarImageView.backgroundColor = UIColor.flatCoffee()
+            cell.messageBackground.backgroundColor = UIColor.flatMaroon()
+        }
         return cell
     }
     
     
     //TODO: Declare numberOfRowsInSection here:
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return messageArray2.count
+        return messageArray.count
     }
     
     //Optional Number of sections//
@@ -155,7 +161,7 @@ UITextFieldDelegate{
             message.messageBody = text
             message.sender = sender
             
-            self.messageArray2.append(message)
+            self.messageArray.append(message)
             self.configureTableView()
             self.messageTableView.reloadData()
         }
@@ -177,7 +183,5 @@ UITextFieldDelegate{
             print("There was a problem signing out.")
         }
     }
-    
-
     
 }
